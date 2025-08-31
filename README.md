@@ -33,6 +33,46 @@ Blueprint de esquema “Clientes” multi‑SGBD (MySQL, PostgreSQL, SQL Server,
 ## Como executar
 Escolha seu SGBD e siga os passos. Os scripts criam apenas a tabela (não criam banco/esquema). Use/Crie um banco antes de executar quando necessário.
 
+### Com Docker Compose (recomendado)
+Suba Postgres e MySQL com um comando e execute os scripts dentro dos containers.
+
+1) Opcional: copie o arquivo de exemplo de variáveis e ajuste se quiser
+```
+cp .env.example .env
+```
+
+2) Suba os serviços
+```
+docker compose up -d
+```
+
+3) Aplique os scripts
+
+- PostgreSQL
+```
+# DDL
+docker compose exec postgres sh -lc 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f /scripts/postgres/01_ddl.sql'
+# Seeds
+docker compose exec postgres sh -lc 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f /scripts/postgres/02_seed.sql'
+# Consultas exemplo (opcional)
+docker compose exec postgres sh -lc 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f /scripts/postgres/03_queries.sql'
+```
+
+- MySQL
+```
+# DDL
+docker compose exec mysql sh -lc 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" -e "SOURCE /scripts/mysql/01_ddl.sql"'
+# Seeds
+docker compose exec mysql sh -lc 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" -e "SOURCE /scripts/mysql/02_seed.sql"'
+# Consultas exemplo (opcional)
+docker compose exec mysql sh -lc 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" -e "SOURCE /scripts/mysql/03_queries.sql"'
+```
+
+4) Encerrar e limpar (opcional)
+```
+docker compose down -v
+```
+
 ### MySQL/MariaDB
 Pré‑requisitos: cliente `mysql` disponível e um usuário com permissão para criar tabelas.
 
@@ -110,9 +150,8 @@ sqlite3 clientes.db ".read sqlite/03_queries.sql"
 - SQLite: na maior parte dos casos `INTEGER PRIMARY KEY` já auto‑incrementa de forma suficiente; `AUTOINCREMENT` é incluído aqui por clareza (usa `sqlite_sequence`).
 
 ## Próximos passos (ideias)
-- Adicionar `docker-compose` para subir PostgreSQL/MySQL rapidamente.
+- Adicionar Adminer/pgAdmin para visualização rápida.
 - Incluir exemplos de índices e consultas parametrizadas.
 - Testes simples com scripts de verificação automática.
 
 Contribuições são bem‑vindas via issues e PRs.
-
